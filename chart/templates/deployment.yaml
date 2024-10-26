@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: {{ .Values.deploy.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  strategy:
+    {{- toYaml .Values.deploy.strategy | nindent 4 }}
+  revisionHistoryLimit: {{ .Values.deploy.revisionHistoryLimit }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+        app.kubernetes.io/component: {{ .Values.appName }}
+        app.kubernetes.io/instance: {{ .Values.appName }}
+        app.kubernetes.io/name: {{ .Values.appName }}
+    spec:
+      imagePullSecrets:
+      - name: {{ .Values.deploy.imagePullSecrets.name }}
+      securityContext:
+        {{- toYaml .Values.deploy.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Values.appName }}
+        securityContext:
+           {{- toYaml .Values.deploy.securityContext | nindent 12 }}
+        image: "{{ .Values.deploy.image.uri }}"
+        imagePullPolicy: {{ .Values.deploy.image.pullPolicy }}
+        ports:
+        - name: http-port-0-0
+          containerPort: {{ .Values.deploy.port }}
+          protocol: TCP
+        resources:
+           {{- toYaml .Values.deploy.resources | nindent 12 }}
+      {{- with .Values.deploy.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.Affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deploy.tolerations }}
+      tolerations:
+       {{- toYaml . | nindent 8 }}
+      {{- end }}

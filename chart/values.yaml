@@ -1,0 +1,37 @@
+#App名称
+appName: spring-demo-lyl
+#流量入口
+# Deployment 配置
+deploy:
+  port: 8080
+  replicaCount: 1
+  imagePullSecrets:
+    name: baiduhub
+  image:
+    uri: ${IPIPE_DOCKER_IMAGE_URL}
+    pullPolicy: Always
+  revisionHistoryLimit: 10
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 50m
+      memory: 1Gi
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  podSecurityContext: {}
+  securityContext: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+# SVC配置
+service:
+  type: NodePort
+  port: 8080
+  nodeport: 32663
+
+
